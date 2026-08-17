@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# Checkpoints / models
+checkpoints/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Training artifacts
+wandb/
+logs/
+*.log
+temp_results_*.csv
+
+# Evaluation results
+results/
+*.csv
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data construction / intermediate files
+sft_checkpoint.json
+*.backup
