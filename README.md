@@ -111,11 +111,6 @@ All data is included in the `data/` directory.
 
 1. Install [verl](https://github.com/volcengine/verl) and its dependencies.
 2. Clone this repo into (or alongside) your verl checkout.
-3. Install Python deps:
-
-```bash
-pip install datasets transformers accelerate pandas torch
-```
 
 ---
 
