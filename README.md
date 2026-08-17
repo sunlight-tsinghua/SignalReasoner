@@ -44,9 +44,7 @@ SignalReasoner/
 │   ├── grpo.sh               # GRPO training
 │   ├── gmpo.sh               # GMPO training
 │   ├── gspo.sh               # GSPO training
-│   ├── cal_metric.py         # evaluation
-│   ├── inspect_data.py       # inspect parquet datasets
-│   └── filter_sft_data.py    # optional SFT token-length filtering
+│   └── cal_metric.py         # evaluation
 └── reward/
     └── wireless.py           # rule-based reward function
 ```
@@ -111,6 +109,21 @@ All data is included in the `data/` directory.
 
 1. Install [verl](https://github.com/volcengine/verl) and its dependencies.
 2. Clone this repo into (or alongside) your verl checkout.
+
+### ⚠️ Model setup note (EOS token mismatch)
+
+A subtle but critical issue arises when using **Qwen2.5-3B-Base** directly for SFT. The Base
+model's default end-of-sequence token is `<|endoftext|>`, whereas the chat template used in the
+SFT training data employs `<|im_end|>` as the sequence delimiter. This mismatch causes the model
+to fail to recognize when a response should terminate, resulting in repetitive generation.
+
+To resolve this, replace the Base model's `generation_config.json` and `tokenizer_config.json`
+with those from **Qwen2.5-3B-Instruct**, which properly defines `<|im_end|>` as the
+end-of-sequence token. This configuration swap ensures the model correctly identifies sequence
+boundaries during both SFT and subsequent RL training, without changing any model weights.
+
+Alternatively, you can simply fine-tune from **Qwen2.5-3B-Instruct** directly instead of the
+Base model.
 
 ---
 
