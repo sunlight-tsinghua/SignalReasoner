@@ -11,7 +11,6 @@ from tqdm import tqdm
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --num_processes=4 mine/cal_metric.py
 '''
 
-# ---------- 配置 ----------
 _SOLUTION_CLIP_CHARS = 500
 
 def set_seed(seed: int = 42):
@@ -21,14 +20,13 @@ def set_seed(seed: int = 42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# ---------- 答案提取（支持嵌套花括号） ----------
+
 def extract_boxed_answers(text: str) -> list:
     pattern = r"\\boxed\{([^}]*)\}"
     matches = re.findall(pattern, text)
     return [m.strip() for m in matches]
 
 def normalize_math_expression(s: str) -> str:
-    """移除字符串中所有空白字符（包括内部空格）"""
     return re.sub(r'\s+', '', s)
 
 def is_correct(solution_str: str, ground_truth: str) -> bool:
@@ -55,7 +53,7 @@ def is_correct(solution_str: str, ground_truth: str) -> bool:
             return False
     return True
 
-# ---------- 分布式初始化 ----------
+
 state = PartialState()
 local_rank = state.local_process_index
 world_size = state.num_processes
@@ -63,8 +61,8 @@ world_size = state.num_processes
 if local_rank == 0:
     print(f"🚀 Using {world_size} GPUs for data‑parallel inference.")
 
-# ---------- 加载模型和数据 ----------
-model_path = "checkpoints/qwen_3b_sft_grponew1400"   # 请根据实际修改
+
+model_path = "checkpoints/qwen_3b_sft_grponew1400"   
 data_path = "data/test.parquet"
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side='left')
@@ -82,7 +80,7 @@ df = pd.read_parquet(data_path)
 total_samples = len(df)
 print(f"[GPU {local_rank}] Total samples: {total_samples}")
 
-# 数据分片
+
 chunk_size = total_samples // world_size
 start = local_rank * chunk_size
 end = start + chunk_size
@@ -91,7 +89,6 @@ if local_rank == world_size - 1:
 local_df = df.iloc[start:end].reset_index(drop=True)
 print(f"[GPU {local_rank}] Processing samples {start}~{end-1} (total: {len(local_df)})")
 
-# ---------- 准备输入 ----------
 BATCH_SIZE = 16
 MAX_NEW_TOKENS = 1024
 
@@ -105,7 +102,7 @@ for _, row in local_df.iterrows():
     ground_truths.append(gt)
     types.append(sample_type)
 
-# ---------- 批量推理 ----------
+
 all_responses = []
 all_gen_lens = []
 
@@ -123,7 +120,7 @@ for i in tqdm(range(0, len(prompts), BATCH_SIZE), desc=f"GPU {local_rank}", disa
         outputs = model.generate(
             **inputs,
             max_new_tokens=MAX_NEW_TOKENS,
-            # do_sample=False,          # 贪婪解码（若需要采样可改）
+            # do_sample=False,          
             temperature=0.6,
             top_p=0.9,
             # repetition_penalty=1.1
@@ -136,7 +133,7 @@ for i in tqdm(range(0, len(prompts), BATCH_SIZE), desc=f"GPU {local_rank}", disa
         all_responses.append(response)
         all_gen_lens.append(gen_len)
 
-# ---------- 构建本进程结果 ----------
+
 results_local = []
 for idx, (gt, resp, typ, glen) in enumerate(zip(ground_truths, all_responses, types, all_gen_lens)):
     correct = is_correct(resp, gt)
@@ -155,7 +152,6 @@ print(f"[GPU {local_rank}] Saved {len(results_local)} results.")
 
 state.wait_for_everyone()
 
-# ---------- 主进程汇总 ----------
 if local_rank == 0:
     all_files = [f"temp_results_rank_{i}.csv" for i in range(world_size)]
     dfs = [pd.read_csv(f) for f in all_files]

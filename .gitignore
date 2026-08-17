@@ -27,6 +27,7 @@ results/
 .vscode/
 .idea/
 .DS_Store
+.history/
 
 # Jupyter
 .ipynb_checkpoints/

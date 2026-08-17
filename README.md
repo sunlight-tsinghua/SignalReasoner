@@ -195,10 +195,9 @@ overall Pass@1 and per-type accuracy on `data/test.parquet`.
 
 ```bibtex
 @misc{SignalReasoner,
-  author = {<AUTHORS>},
-  title  = {SignalReasoner: Wireless-Domain Mathematical Reasoning via SFT and RL},
+  author = {Guozheng Sun},
+  title  = {SignalReasoner: Assessing the Upper Bound of 3B Models for Signal Mathematical Reasoning},
   year   = {2025},
-  url    = {<REPO_URL>}
 }
 ```
 
