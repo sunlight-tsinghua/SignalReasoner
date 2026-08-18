@@ -197,7 +197,7 @@ overall Pass@1 and per-type accuracy on `data/test.parquet`.
 @misc{SignalReasoner,
   author = {Guozheng Sun},
   title  = {SignalReasoner: Assessing the Upper Bound of 3B Models for Signal Mathematical Reasoning},
-  year   = {2025},
+  year   = {2025}
 }
 ```
 
